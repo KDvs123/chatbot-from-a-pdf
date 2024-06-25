@@ -78,47 +78,25 @@ def main():
         
         query= st.text_input("Ask questions about your pdf file")
 
-
         if query:
-            
-            docs = vectorstores.similarity_search(query, k=3)
+            docs = vectorstores.similarity_search(query=query)
  
-            llm = OpenAI()
-            chain = load_qa_chain(llm=llm, chain_type="stuff")
-            with get_openai_callback() as cb:
-                response = chain.run(input_documents=docs, question=query)
-                print(cb)
+            llm = OpenAI(temperature=0)
+
+            # Customize the QA chain to generate instructional and lengthy answers
+            def customized_qa_chain(llm, docs, query):
+                chain = load_qa_chain(llm=llm, chain_type="stuff")
+                with get_openai_callback() as cb:
+                    response = chain.run(input_documents=docs, question=query)
+                    print(cb)
+                # Customizing the response format
+                instructional_response = f"Here are the detailed steps for your query:\n\n{response}\n\nFollow these instructions carefully to get the best results."
+                return instructional_response
+
+            response = customized_qa_chain(llm, docs, query)
             st.write(response)
- 
-
-
-
-
-           
-
-
-
-            
-
-            
-          
-
-        
 
 
         
-
-
-        
-
-
-
-    
-
-
-
-
-
-
 if __name__=='__main__':
     main()
